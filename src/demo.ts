@@ -1,8 +1,8 @@
-import { createApp, ref, h } from 'vue'
+import { createApp, ref, h, defineComponent } from 'vue'
 import MiniEditor from './components/Common/MiniEditor.vue'
 import './styles/main.css'
 
-const App = {
+const App = defineComponent({
   setup() {
     const content = ref('')
     return { content }
@@ -12,7 +12,7 @@ const App = {
       h('h1', { class: 'text-2xl font-bold mb-4' }, 'Mini Editor Demo'),
       h(MiniEditor, {
         modelValue: this.content,
-        'onUpdate:modelValue': (value: string) => this.content = value,
+        'onUpdate:modelValue': (value: string) => { this.content = value },
         label: 'Editor',
         hint: 'This is a rich text editor',
         required: true,
@@ -27,7 +27,7 @@ const App = {
       ])
     ])
   }
-}
+})
 
 const app = createApp(App)
 app.mount('#app') 
