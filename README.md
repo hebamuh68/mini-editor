@@ -1,5 +1,3 @@
-![CI](https://github.com/hebamuh68/mini-editor/actions/workflows/ci.yml/badge.svg)
-
 # @hebamuh28/mini-editor
 
 A lightweight, feature-rich rich text editor component for Vue 3 applications.
