@@ -1,5 +1,5 @@
 {
-  "name": "@hebamuh68/mini-editor",
+  "name": "@hebamuh28/mini-editor",
   "version": "1.0.0",
   "description": "A lightweight rich text editor component for Vue 3",
   "main": "dist/mini-editor.umd.js",
