@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
+const { defineConfig } = require('vite')
+const vue = require('@vitejs/plugin-vue')
+const { resolve } = require('path')
 
-export default defineConfig({
+module.exports = defineConfig({
   plugins: [vue()],
   build: {
     lib: {
