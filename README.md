@@ -1,10 +1,12 @@
-[![CI](https://github.com/heba28/mini-editor/actions/workflows/ci.yml/badge.svg)](https://github.com/heba28/mini-editor/actions)
+![CI](https://github.com/hebamuh68/mini-editor/actions/workflows/ci.yml/badge.svg)
 
-# Mini Editor
+# @hebamuh28/mini-editor
 
-A lightweight rich text editor component for Vue 3 applications.
+A lightweight, feature-rich rich text editor component for Vue 3 applications.
 
-## Features
+---
+
+## ✨ Features
 
 - Rich text formatting (bold, italic, underline, strikethrough)
 - Text alignment
@@ -13,21 +15,27 @@ A lightweight rich text editor component for Vue 3 applications.
 - Text color and highlight color
 - Media upload support
 - Undo/Redo functionality
-- RTL support
-- Multilingual support (English/Arabic)
+- RTL and multilingual support (English/Arabic)
 - Tailwind CSS styling
 
-## Installation
+---
+
+## 📦 Installation
 
 ```bash
-npm install mini-editor
-# or
-yarn add mini-editor
-# or
-pnpm add mini-editor
+# With npm
+npm install @hebamuh28/mini-editor
+
+# With pnpm
+pnpm add @hebamuh28/mini-editor
+
+# With yarn
+yarn add @hebamuh28/mini-editor
 ```
 
-## Usage
+---
+
+## 🚀 Usage
 
 ```vue
 <template>
@@ -42,34 +50,48 @@ pnpm add mini-editor
 
 <script setup>
 import { ref } from 'vue'
-import { MiniEditor } from 'mini-editor'
+import { MiniEditor } from '@hebamuh28/mini-editor'
 
 const content = ref('')
 </script>
 ```
 
-## Props
+---
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| modelValue | String | '' | The content of the editor |
-| label | String | '' | Label text for the editor |
-| hint | String | '' | Helpful hint text shown on hover |
-| required | Boolean | false | Whether the editor is required |
-| placeholder | String | '' | Placeholder text when editor is empty |
+## ⚙️ Props
 
-## Events
+| Prop         | Type    | Default | Description                        |
+|--------------|---------|---------|------------------------------------|
+| modelValue   | String  | ''      | The content of the editor          |
+| label        | String  | ''      | Label text for the editor          |
+| hint         | String  | ''      | Helpful hint text shown on hover   |
+| required     | Boolean | false   | Whether the editor is required     |
+| placeholder  | String  | ''      | Placeholder text when empty        |
 
-| Event | Description |
-|-------|-------------|
-| update:modelValue | Emitted when the content changes |
-| blur | Emitted when the editor loses focus |
+---
 
-## License
+## 🔔 Events
 
-MIT 
+| Event              | Description                        |
+|--------------------|------------------------------------|
+| update:modelValue  | Emitted when the content changes   |
+| blur               | Emitted when the editor loses focus|
 
-## Contributing
+---
+
+## 🧪 Testing
+
+To run tests locally:
+
+```bash
+pnpm run test
+# or
+npm run test
+```
+
+---
+
+## 🤝 Contributing
 
 Contributions are welcome! Please open issues or pull requests for bugs, features, or improvements.
 
@@ -79,16 +101,16 @@ Contributions are welcome! Please open issues or pull requests for bugs, feature
 4. Run the linter and tests
 5. Open a pull request
 
-## Changelog
+---
 
-See [CHANGELOG.md](./CHANGELOG.md) for release notes and version history.
+## 📜 License
 
-## Testing
+MIT
 
-To run tests (after they are added):
+---
 
-```bash
-npm run test
-``` 
+## 📓 Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for release notes and version history. 
 
 
