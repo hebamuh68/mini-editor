@@ -16,7 +16,8 @@ describe('MiniEditor', () => {
     expect(wrapper.text()).toContain('Test Editor')
     // Simulate input
     const editor = wrapper.find('[contenteditable]')
-    await editor.setValue('Hello world!')
+    editor.element.innerHTML = 'Hello world!'
+    await editor.trigger('input')
     // The value should update in the DOM
     expect(editor.element.innerHTML).toContain('Hello world!')
   })
