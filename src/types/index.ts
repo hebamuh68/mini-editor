@@ -12,6 +12,24 @@ export interface MiniEditorProps {
   };
   showLanguageSwitcher?: boolean;
   defaultLanguage?: 'ar' | 'en';
+  // Toolbar customization props
+  showTextColor?: boolean;
+  showHighlight?: boolean;
+  showBold?: boolean;
+  showItalic?: boolean;
+  showUnderline?: boolean;
+  showStrike?: boolean;
+  showBulletList?: boolean;
+  showNumberedList?: boolean;
+  showAlignRight?: boolean;
+  showAlignCenter?: boolean;
+  showAlignLeft?: boolean;
+  showHeadings?: boolean;
+  showMedia?: boolean;
+  showUndo?: boolean;
+  showRedo?: boolean;
+  showClearFormatting?: boolean;
+  showPreview?: boolean;
 }
 
 export interface ColorState {

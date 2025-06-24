@@ -1,5 +1,5 @@
 import MiniEditor from './components/Common/MiniEditor.vue'
-import './styles/main.css'
+import './styles/editor.css'
 
 // Export the main component
 export { MiniEditor }
