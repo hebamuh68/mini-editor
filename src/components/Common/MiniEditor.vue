@@ -67,6 +67,7 @@
                 class="color-gradient-area"
                 data-type="text"
                 :style="{ 
+                  minWidth: '200px', minHeight: '120px',
                   '--hue-color': `hsl(${textHue}, 100%, 50%)`,
                   background: `
                     linear-gradient(to bottom, transparent, black), 
@@ -112,6 +113,7 @@
                 class="color-gradient-area"
                 data-type="hilite"
                 :style="{ 
+                  minWidth: '200px', minHeight: '120px',
                   '--hue-color': `hsl(${hiliteHue}, 100%, 50%)`,
                   background: `
                     linear-gradient(to bottom, transparent, black), 
