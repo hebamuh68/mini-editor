@@ -27,6 +27,8 @@ import FallbackIcon from './FallbackIcon.vue'
 import LangIcon from './LangIcon.vue'
 import MediaIcon from './MediaIcon.vue'
 import PreviewIcon from './PreviewIcon.vue'
+import InfoIcon from './InfoIcon.vue'
+
 
 const props = defineProps({
   name: {
@@ -56,7 +58,7 @@ const iconComponent = computed(() => {
     Undo: UndoIcon,
     Redo: RedoIcon,
     Broom: BroomIcon,
-    Info: FallbackIcon,
+    Info: InfoIcon,
     Lang: LangIcon,
     Media: MediaIcon,
     Preview: PreviewIcon

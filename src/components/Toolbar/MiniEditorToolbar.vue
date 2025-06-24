@@ -231,6 +231,7 @@
       @click="$emit('preview')"
       :class="toolbarBtn()"
       title="Preview"
+      style="background-color: #C6CDFF"
     >
       <Icon name="Preview" class="icon" />
     </button>

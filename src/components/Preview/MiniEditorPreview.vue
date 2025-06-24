@@ -5,7 +5,9 @@
       <div class="flex items-center justify-between p-4 border-b border-gray-200">
         <div class="flex items-center gap-2">
           <Icon name="Preview" class="icon" />
-          <h3 class="text-lg font-semibold text-gray-900">Preview</h3>
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            Preview
+          </h3>
         </div>
         <button
           @click="$emit('close')"
@@ -17,11 +19,26 @@
         </button>
       </div>
 
+      <!-- Language Toggle -->
+      <div class="flex justify-end p-4 pt-2 gap-2">
+        <button
+          v-for="lang in ['en', 'ar']"
+          :key="lang"
+          :class="[
+            'px-3 py-1 rounded text-sm font-medium border',
+            currentLang === lang ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+          ]"
+          @click="currentLang = lang"
+        >
+          {{ lang === 'en' ? 'English' : 'العربية' }}
+        </button>
+      </div>
+
       <!-- Content -->
-      <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+      <div class="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
         <div class="prose max-w-none">
           <div 
-            v-html="content" 
+            v-html="contentToShow" 
             class="preview-content"
             :dir="direction"
             :class="direction === 'rtl' ? 'text-right' : 'text-left'"
@@ -32,15 +49,16 @@
       <!-- Footer -->
       <div class="flex items-center justify-between p-4 border-t border-gray-200">
         <div class="text-sm text-gray-500">
-          {{ language === 'ar' ? 'العربية' : 'English' }}
+          {{ currentLang === 'ar' ? 'العربية' : 'English' }}
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
           <button
             @click="copyToClipboard"
             class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
           >
             Copy HTML
           </button>
+          <span v-if="copied" class="text-green-600 text-xs ml-2">Copied!</span>
           <button
             @click="$emit('close')"
             class="px-4 py-2 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
@@ -54,7 +72,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import Icon from '../icons/Icon.vue'
 
 const props = defineProps({
   isVisible: {
@@ -68,19 +87,33 @@ const props = defineProps({
   language: {
     type: String,
     default: 'ar'
-  }
+  },
+  // Accept both ar/en for toggling
+  contentAr: String,
+  contentEn: String
 })
 
 const emit = defineEmits(['close'])
 
+const currentLang = ref(props.language)
+watch(() => props.language, (val) => { currentLang.value = val })
+
 const direction = computed(() => {
-  return props.language === 'ar' ? 'rtl' : 'ltr'
+  return currentLang.value === 'ar' ? 'rtl' : 'ltr'
 })
 
+const contentToShow = computed(() => {
+  if (props.contentAr && props.contentEn) {
+    return currentLang.value === 'ar' ? props.contentAr : props.contentEn
+  }
+  return props.content
+})
+
+const copied = ref(false)
 function copyToClipboard() {
-  navigator.clipboard.writeText(props.content).then(() => {
-    // You could add a toast notification here
-    console.log('HTML copied to clipboard')
+  navigator.clipboard.writeText(contentToShow.value).then(() => {
+    copied.value = true
+    setTimeout(() => copied.value = false, 1200)
   }).catch(err => {
     console.error('Failed to copy: ', err)
   })

@@ -174,7 +174,8 @@
     <!-- Preview Modal -->
     <MiniEditorPreview
       :is-visible="showPreviewModal"
-      :content="currentValue"
+      :content-ar="modelValue.ar"
+      :content-en="modelValue.en"
       :language="currentLang"
       @close="showPreviewModal = false"
     />
