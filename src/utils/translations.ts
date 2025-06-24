@@ -21,6 +21,7 @@ export interface TranslationConfig {
   undo: string;
   redo: string;
   clearFormatting: string;
+  preview: string;
 }
 
 export interface Translations {
@@ -51,6 +52,7 @@ export const defaultTranslations: Translations = {
     undo: "تراجع",
     redo: "إعادة",
     clearFormatting: "مسح التنسيق",
+    preview: "معاينة",
   },
   en: {
     switchLanguage: "Switch Language",
@@ -74,6 +76,7 @@ export const defaultTranslations: Translations = {
     undo: "Undo",
     redo: "Redo",
     clearFormatting: "Clear Formatting",
+    preview: "Preview",
   },
 };
 

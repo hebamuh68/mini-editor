@@ -3,7 +3,10 @@
     <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
       <!-- Header -->
       <div class="flex items-center justify-between p-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900">{{ translations[currentLang].insertMedia }}</h3>
+        <div class="flex items-center gap-2">
+          <Icon name="Media" class="icon" />
+          <h3 class="text-lg font-semibold text-gray-900">{{ translations[currentLang].insertMedia }}</h3>
+        </div>
         <button
           @click="$emit('close')"
           class="text-gray-400 hover:text-gray-600 transition-colors"

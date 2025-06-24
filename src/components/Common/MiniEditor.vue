@@ -22,7 +22,7 @@
         <span v-if="required" class="text-red-600 ms-1">*</span>
       </label>
     
-      <div class="p-4">
+      <div class="p-4 relative">
         <!-- Toolbar -->
         <MiniEditorToolbar
           :current-lang="currentLang"

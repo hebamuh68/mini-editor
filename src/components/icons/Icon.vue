@@ -24,6 +24,9 @@ import UndoIcon from './UndoIcon.vue'
 import RedoIcon from './RedoIcon.vue'
 import BroomIcon from './BroomIcon.vue'
 import FallbackIcon from './FallbackIcon.vue'
+import LangIcon from './LangIcon.vue'
+import MediaIcon from './MediaIcon.vue'
+import PreviewIcon from './PreviewIcon.vue'
 
 const props = defineProps({
   name: {
@@ -54,9 +57,9 @@ const iconComponent = computed(() => {
     Redo: RedoIcon,
     Broom: BroomIcon,
     Info: FallbackIcon,
-    Lang: FallbackIcon,
-    Media: FallbackIcon,
-    Preview: FallbackIcon
+    Lang: LangIcon,
+    Media: MediaIcon,
+    Preview: PreviewIcon
   }
   
   return iconMap[props.name] || FallbackIcon
