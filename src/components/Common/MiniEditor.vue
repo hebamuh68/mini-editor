@@ -57,17 +57,17 @@
         />
 
         <!-- Color Panels -->
-        <div
-          v-if="showTextColorPanel"
-          ref="textColorPanelRef"
-          class="absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1 left-0"
-        >
+        <div class="relative inline-block">
+          <div
+            v-if="showTextColorPanel"
+            ref="textColorPanelRef"
+            class="absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1 left-0"
+          >
             <div class="color-picker-advanced">
               <div 
                 class="color-gradient-area"
                 data-type="text"
                 :style="{ 
-                  minWidth: '200px', minHeight: '120px',
                   '--hue-color': `hsl(${textHue}, 100%, 50%)`,
                   background: `
                     linear-gradient(to bottom, transparent, black), 
@@ -84,7 +84,6 @@
                   }"
                 ></div>
               </div>
-              
               <div 
                 class="hue-slider"
                 data-type="text"
@@ -95,25 +94,24 @@
                   :style="{ left: `${(textHue / 360) * 100}%` }"
                 ></div>
               </div>
-              
-            <div
-              class="color-preview"
-              :style="{ backgroundColor: textColor }"
-            ></div>
+              <div
+                class="color-preview"
+                :style="{ backgroundColor: textColor }"
+              ></div>
+            </div>
           </div>
         </div>
-
-        <div
-          v-if="showHilitePanel"
-          ref="hilitePanelRef"
-          class="absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1 left-0"
-        >
+        <div class="relative inline-block">
+          <div
+            v-if="showHilitePanel"
+            ref="hilitePanelRef"
+            class="absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1 left-0"
+          >
             <div class="color-picker-advanced">
               <div 
                 class="color-gradient-area"
                 data-type="hilite"
                 :style="{ 
-                  minWidth: '200px', minHeight: '120px',
                   '--hue-color': `hsl(${hiliteHue}, 100%, 50%)`,
                   background: `
                     linear-gradient(to bottom, transparent, black), 
@@ -130,7 +128,6 @@
                   }"
                 ></div>
               </div>
-              
               <div 
                 class="hue-slider"
                 data-type="hilite"
@@ -141,11 +138,11 @@
                   :style="{ left: `${(hiliteHue / 360) * 100}%` }"
                 ></div>
               </div>
-              
-            <div
-              class="color-preview"
-              :style="{ backgroundColor: hiliteColor }"
-            ></div>
+              <div
+                class="color-preview"
+                :style="{ backgroundColor: hiliteColor }"
+              ></div>
+            </div>
           </div>
         </div>
 
