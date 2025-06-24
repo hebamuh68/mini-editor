@@ -1,50 +1,164 @@
-# @hebamuh28/mini-editor
+# Mini Editor - Enhanced Rich Text Editor
 
-A lightweight, feature-rich rich text editor component for Vue 3 applications with comprehensive translation support.
-
----
+A powerful, modular Vue 3 rich text editor with comprehensive translation support, customizable toolbar, preview functionality, and enhanced media handling.
 
 ## ✨ Features
 
-- Rich text formatting (bold, italic, underline, strikethrough)
-- Text alignment and headings (H1-H5)
-- Lists (ordered and unordered)
-- Text color and highlight color with advanced color picker
-- Media upload support (images, video, audio)
-- Undo/Redo functionality
-- **RTL and multilingual support (Arabic/English)**
-- **Comprehensive translation system**
-- **Language switching with UI**
-- Tailwind CSS styling
-- **Exportable translation utilities**
+### 🎨 **Core Features**
+- **Rich Text Editing**: Bold, italic, underline, strikethrough
+- **Text Formatting**: Headings (H1-H5), text color, highlight colors
+- **Lists & Alignment**: Bullet lists, numbered lists, text alignment
+- **Multilingual Support**: Arabic and English with RTL/LTR switching
+- **Media Support**: Images, videos, audio with size controls
+- **HTML Paste**: Paste HTML code directly into the editor
+- **Preview Mode**: Preview content in a popup modal
+- **Undo/Redo**: Full undo/redo functionality
+- **Clear Formatting**: Remove all formatting with one click
 
----
+### 🔧 **Modular Architecture**
+- **Separate Toolbar Component**: Customizable toolbar with show/hide options
+- **Preview Component**: Standalone preview modal
+- **Media Uploader**: Enhanced media upload with multiple tabs
+- **Unified Icon System**: Centralized icon management
+- **CSS Separation**: All styles moved to external CSS file
+
+### 🎛️ **Toolbar Customization**
+Control which buttons appear in the toolbar:
+
+```vue
+<MiniEditor
+  :show-bold="true"
+  :show-italic="true"
+  :show-underline="false"
+  :show-headings="true"
+  :show-media="true"
+  :show-preview="true"
+  :show-language-switcher="true"
+  :show-text-color="true"
+  :show-highlight="true"
+  :show-bullet-list="true"
+  :show-numbered-list="true"
+  :show-align-right="true"
+  :show-align-center="true"
+  :show-align-left="true"
+  :show-undo="true"
+  :show-redo="true"
+  :show-clear-formatting="true"
+/>
+```
+
+### 📱 **Enhanced Media Upload**
+- **File Upload**: Drag & drop or click to upload
+- **URL Input**: Paste media URLs directly
+- **HTML Paste**: Paste HTML code for custom media
+- **Size Controls**: Adjust width/height with presets
+- **Preview**: See media before inserting
+- **Multiple Formats**: Images, videos, audio files
+
+### 🌐 **Translation System**
+- **Built-in Translations**: Arabic and English
+- **Custom Translations**: Override any translation
+- **Exportable Utilities**: Use translation functions in your app
+- **RTL/LTR Support**: Automatic direction switching
 
 ## 📦 Installation
 
 ```bash
-# With npm
 npm install @hebamuh28/mini-editor
-
-# With pnpm
-pnpm add @hebamuh28/mini-editor
-
-# With yarn
+# or
 yarn add @hebamuh28/mini-editor
+# or
+pnpm add @hebamuh28/mini-editor
 ```
 
----
-
-## 🚀 Basic Usage
+## 🚀 Quick Start
 
 ```vue
 <template>
-  <MiniEditor
-    v-model="content"
-    :label="'Editor Label'"
-    :hint="'Helpful hint text'"
-    :required="true"
-    :placeholder="'Start typing...'"
+  <div>
+    <MiniEditor 
+      v-model="content" 
+      label="My Editor"
+      placeholder="Start typing..."
+    />
+    <pre>{{ content }}</pre>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { MiniEditor } from '@hebamuh28/mini-editor'
+
+const content = ref({ ar: '', en: '' })
+</script>
+```
+
+## 📖 Advanced Usage
+
+### Full Featured Editor
+
+```vue
+<MiniEditor 
+  v-model="content" 
+  label="Full Featured Editor"
+  placeholder="Start typing here..."
+  :show-language-switcher="true"
+  :show-text-color="true"
+  :show-highlight="true"
+  :show-bold="true"
+  :show-italic="true"
+  :show-underline="true"
+  :show-strike="true"
+  :show-bullet-list="true"
+  :show-numbered-list="true"
+  :show-align-right="true"
+  :show-align-center="true"
+  :show-align-left="true"
+  :show-headings="true"
+  :show-media="true"
+  :show-undo="true"
+  :show-redo="true"
+  :show-clear-formatting="true"
+  :show-preview="true"
+/>
+```
+
+### Minimal Editor
+
+```vue
+<MiniEditor 
+  v-model="content" 
+  label="Minimal Editor"
+  placeholder="Basic formatting only..."
+  :show-language-switcher="false"
+  :show-text-color="false"
+  :show-highlight="false"
+  :show-bold="true"
+  :show-italic="true"
+  :show-underline="false"
+  :show-strike="false"
+  :show-bullet-list="true"
+  :show-numbered-list="true"
+  :show-align-right="false"
+  :show-align-center="false"
+  :show-align-left="false"
+  :show-headings="false"
+  :show-media="false"
+  :show-undo="true"
+  :show-redo="true"
+  :show-clear-formatting="false"
+  :show-preview="false"
+/>
+```
+
+### Custom Translations
+
+```vue
+<template>
+  <MiniEditor 
+    v-model="content" 
+    label="Custom Translations"
+    :translations="customTranslations"
   />
 </template>
 
@@ -52,49 +166,26 @@ yarn add @hebamuh28/mini-editor
 import { ref } from 'vue'
 import { MiniEditor } from '@hebamuh28/mini-editor'
 
-const content = ref({
-  ar: '',
-  en: ''
-})
-</script>
-```
+const content = ref({ ar: '', en: '' })
 
----
-
-## 🌍 Advanced Translation Usage
-
-### Custom Translations
-
-```vue
-<template>
-  <MiniEditor
-    v-model="content"
-    :translations="customTranslations"
-    :show-language-switcher="true"
-    :default-language="'ar'"
-  />
-</template>
-
-<script setup>
-import { ref } from 'vue'
-import { MiniEditor, mergeTranslations } from '@hebamuh28/mini-editor'
-
-const content = ref({
-  ar: 'مرحبا بالعالم',
-  en: 'Hello World'
-})
-
-// Custom translations
-const customTranslations = mergeTranslations({
+const customTranslations = {
   ar: {
-    bold: 'عريض جدا',
-    italic: 'مائل جدا'
+    switchLanguage: "تغيير اللغة",
+    textColor: "لون النص",
+    highlight: "تظليل",
+    bold: "عريض",
+    italic: "مائل",
+    // ... more translations
   },
   en: {
-    bold: 'Very Bold',
-    italic: 'Very Italic'
+    switchLanguage: "Change Language",
+    textColor: "Text Color",
+    highlight: "Highlight",
+    bold: "Bold",
+    italic: "Italic",
+    // ... more translations
   }
-})
+}
 </script>
 ```
 
@@ -103,78 +194,136 @@ const customTranslations = mergeTranslations({
 ```javascript
 import { 
   defaultTranslations, 
-  getTranslation, 
-  mergeTranslations 
+  mergeTranslations, 
+  getTranslation,
+  langConfig 
 } from '@hebamuh28/mini-editor'
 
-// Get a specific translation
-const boldText = getTranslation(defaultTranslations, 'ar', 'bold')
-// Returns: "عريض"
-
-// Merge custom translations
-const customTranslations = mergeTranslations({
-  ar: { bold: 'عريض جدا' }
+// Merge custom translations with defaults
+const customTranslations = mergeTranslations(defaultTranslations, {
+  ar: { bold: "عريض جداً" },
+  en: { bold: "Very Bold" }
 })
+
+// Get specific translation
+const boldText = getTranslation('bold', 'ar', customTranslations)
+
+// Language configuration
+console.log(langConfig.ar.label) // "العربية"
 ```
 
----
+## 🎨 Styling
 
-## ⚙️ Props
+The editor uses Tailwind CSS classes and custom CSS. All styles are in `editor.css`:
+
+```css
+/* Custom styles */
+.editor-area {
+  min-height: 120px;
+  max-height: 260px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  font-family: "Tajawal", sans-serif;
+}
+
+.toolbar-btn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 7px;
+  transition: background 0.2s;
+}
+```
+
+## 📋 Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `modelValue` | `Object` | `{}` | Content object with language keys |
-| `label` | `String` | `''` | Label text for the editor |
-| `hint` | `String` | `''` | Helpful hint text shown on hover |
-| `required` | `Boolean` | `false` | Whether the editor is required |
-| `placeholder` | `String` | `''` | Placeholder text when empty |
-| `translations` | `Object` | `defaultTranslations` | Custom translations |
-| `showLanguageSwitcher` | `Boolean` | `true` | Show language switcher button |
+| `modelValue` | `Object` | Required | Content object with `ar` and `en` keys |
+| `label` | `String` | - | Editor label |
+| `hint` | `String` | - | Help text shown with info icon |
+| `required` | `Boolean` | `false` | Show required indicator |
+| `placeholder` | `String` | - | Placeholder text |
+| `translations` | `Object` | Built-in | Custom translations |
+| `showLanguageSwitcher` | `Boolean` | `true` | Show language switcher |
 | `defaultLanguage` | `'ar' \| 'en'` | `'ar'` | Default language |
+| `showTextColor` | `Boolean` | `true` | Show text color button |
+| `showHighlight` | `Boolean` | `true` | Show highlight button |
+| `showBold` | `Boolean` | `true` | Show bold button |
+| `showItalic` | `Boolean` | `true` | Show italic button |
+| `showUnderline` | `Boolean` | `true` | Show underline button |
+| `showStrike` | `Boolean` | `true` | Show strikethrough button |
+| `showBulletList` | `Boolean` | `true` | Show bullet list button |
+| `showNumberedList` | `Boolean` | `true` | Show numbered list button |
+| `showAlignRight` | `Boolean` | `true` | Show align right button |
+| `showAlignCenter` | `Boolean` | `true` | Show align center button |
+| `showAlignLeft` | `Boolean` | `true` | Show align left button |
+| `showHeadings` | `Boolean` | `true` | Show heading buttons |
+| `showMedia` | `Boolean` | `true` | Show media upload button |
+| `showUndo` | `Boolean` | `true` | Show undo button |
+| `showRedo` | `Boolean` | `true` | Show redo button |
+| `showClearFormatting` | `Boolean` | `true` | Show clear formatting button |
+| `showPreview` | `Boolean` | `true` | Show preview button |
 
----
+## 🎯 Events
 
-## 🔔 Events
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `update:modelValue` | `Object` | Content updated |
+| `languageChange` | `String` | Language switched |
 
-| Event | Description |
-|-------|-------------|
-| `update:modelValue` | Emitted when content changes |
-| `languageChange` | Emitted when language is switched |
+## 🏗️ Architecture
 
----
+### Components
+- **MiniEditor.vue**: Main editor component
+- **MiniEditorToolbar.vue**: Customizable toolbar
+- **MiniEditorPreview.vue**: Preview modal
+- **MediaUploader.vue**: Enhanced media upload
+- **Icon.vue**: Unified icon system
 
-## 🧪 Testing
+### Utilities
+- **translations.ts**: Translation management
+- **editor.css**: All editor styles
+- **types/index.ts**: TypeScript definitions
 
-To run tests locally:
+## 🔧 Development
 
 ```bash
+# Install dependencies
+pnpm install
+
+# Run development server
+pnpm run dev
+
+# Build for production
+pnpm run build
+
+# Run tests
 pnpm run test
-# or
-npm run test
+
+# Publish package
+pnpm publish
 ```
 
----
+## 📄 License
+
+MIT License - see LICENSE file for details.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please open issues or pull requests for bugs, features, or improvements.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-1. Fork the repository
-2. Create a new branch for your feature or fix
-3. Make your changes and add tests if possible
-4. Run the linter and tests
-5. Open a pull request
+## 📞 Support
+
+If you have any questions or need help, please open an issue on GitHub.
 
 ---
 
-## 📜 License
-
-MIT
-
----
-
-## 📓 Changelog
-
-See [CHANGELOG.md](./CHANGELOG.md) for release notes and version history. 
+**Version**: 1.2.0  
+**Size**: 91.71 kB (gzipped)  
+**Dependencies**: Vue 3, Tailwind CSS  
+**Browser Support**: Modern browsers with ES6+ support
 
 
