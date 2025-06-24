@@ -57,7 +57,7 @@
         />
         <!-- Color Panels -->
         <div v-if="showTextColorPanel" ref="textColorPanelRef"
-          :class="['absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1', props.rtl ? 'right-0' : 'left-0']">
+          :class="['color-panel-root', 'absolute z-30', props.rtl ? 'right-0' : 'left-0']">
             <div class="color-picker-advanced">
               <div 
                 class="color-gradient-area"
@@ -96,7 +96,7 @@
           </div>
         </div>
         <div v-if="showHilitePanel" ref="hilitePanelRef"
-          :class="['absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1', props.rtl ? 'right-0' : 'left-0']">
+          :class="['color-panel-root', 'absolute z-30', props.rtl ? 'right-0' : 'left-0']">
             <div class="color-picker-advanced">
               <div 
                 class="color-gradient-area"
@@ -785,3 +785,24 @@ function useClickOutside(refs, closeFn) {
 useClickOutside([textColorPanelRef], () => (showTextColorPanel.value = false));
 useClickOutside([hilitePanelRef], () => (showHilitePanel.value = false));
 </script>
+
+<style scoped>
+.color-panel-root {
+  all: initial;
+  font-family: inherit;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.10);
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+  min-width: 240px;
+  min-height: 180px;
+  z-index: 9999;
+  position: absolute;
+  margin-top: 0.25rem;
+}
+.color-panel-root * {
+  box-sizing: border-box;
+}
+</style>
