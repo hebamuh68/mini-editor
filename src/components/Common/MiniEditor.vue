@@ -55,14 +55,9 @@
           @clear-formatting="clearFormatting"
           @preview="showPreviewModal = true"
         />
-
         <!-- Color Panels -->
-        <div class="relative inline-block">
-          <div
-            v-if="showTextColorPanel"
-            ref="textColorPanelRef"
-            class="absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1 left-0"
-          >
+        <div v-if="showTextColorPanel" ref="textColorPanelRef"
+          :class="['absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1', props.rtl ? 'right-0' : 'left-0']">
             <div class="color-picker-advanced">
               <div 
                 class="color-gradient-area"
@@ -72,7 +67,7 @@
                   background: `
                     linear-gradient(to bottom, transparent, black), 
                     linear-gradient(to right, white, hsl(${textHue}, 100%, 50%))
-                `,
+              `,
                 }"
                 @mousedown="startColorDrag($event, 'text')"
               >
@@ -80,7 +75,7 @@
                   class="color-selector-circle"
                   :style="{ 
                     left: `${textSaturation}%`, 
-                  top: `${100 - textLightness}%`,
+                top: `${100 - textLightness}%`,
                   }"
                 ></div>
               </div>
@@ -94,19 +89,14 @@
                   :style="{ left: `${(textHue / 360) * 100}%` }"
                 ></div>
               </div>
-              <div
-                class="color-preview"
-                :style="{ backgroundColor: textColor }"
-              ></div>
-            </div>
+            <div
+              class="color-preview"
+              :style="{ backgroundColor: textColor }"
+            ></div>
           </div>
         </div>
-        <div class="relative inline-block">
-          <div
-            v-if="showHilitePanel"
-            ref="hilitePanelRef"
-            class="absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1 left-0"
-          >
+        <div v-if="showHilitePanel" ref="hilitePanelRef"
+          :class="['absolute z-30 bg-white border rounded-lg shadow-lg p-4 min-w-[280px] mt-1', props.rtl ? 'right-0' : 'left-0']">
             <div class="color-picker-advanced">
               <div 
                 class="color-gradient-area"
@@ -116,7 +106,7 @@
                   background: `
                     linear-gradient(to bottom, transparent, black), 
                     linear-gradient(to right, white, hsl(${hiliteHue}, 100%, 50%))
-                `,
+              `,
                 }"
                 @mousedown="startColorDrag($event, 'hilite')"
               >
@@ -124,7 +114,7 @@
                   class="color-selector-circle"
                   :style="{ 
                     left: `${hiliteSaturation}%`, 
-                  top: `${100 - hiliteLightness}%`,
+                top: `${100 - hiliteLightness}%`,
                   }"
                 ></div>
               </div>
@@ -138,14 +128,12 @@
                   :style="{ left: `${(hiliteHue / 360) * 100}%` }"
                 ></div>
               </div>
-              <div
-                class="color-preview"
-                :style="{ backgroundColor: hiliteColor }"
-              ></div>
-            </div>
+            <div
+              class="color-preview"
+              :style="{ backgroundColor: hiliteColor }"
+            ></div>
           </div>
         </div>
-
         <!-- Editor Area -->
         <div
         ref="editor"
@@ -182,7 +170,8 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed, onBeforeUnmount } from "vue";
+import { ref, watch, onMounted, computed, onBeforeUnmount, nextTick } from "vue";
+import { createPopper } from '@popperjs/core'
 import Icon from '../icons/Icon.vue'
 import MiniEditorToolbar from '../Toolbar/MiniEditorToolbar.vue'
 import MediaUploader from '../Media/MediaUploader.vue'
@@ -276,6 +265,7 @@ const props = defineProps({
   showRedo: { type: Boolean, default: true },
   showClearFormatting: { type: Boolean, default: true },
   showPreview: { type: Boolean, default: true },
+  rtl: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["update:modelValue", "languageChange"]);
@@ -316,6 +306,14 @@ const currentValue = computed({
     });
   },
 });
+
+const toolbarRef = ref(null)
+const textColorBtnRef = ref(null)
+const highlightBtnRef = ref(null)
+const textColorPanelRef = ref(null)
+const hilitePanelRef = ref(null)
+let textColorPopper = null
+let hilitePopper = null
 
 function switchLanguage(lang) {
   currentLang.value = lang;
@@ -586,6 +584,8 @@ onBeforeUnmount(() => {
   // Clean up global event listeners
   document.removeEventListener("mousemove", handleGlobalMouseMove);
   document.removeEventListener("mouseup", handleGlobalMouseUp);
+  if (textColorPopper) textColorPopper.destroy()
+  if (hilitePopper) hilitePopper.destroy()
 });
 
 // Helper function to update color values
@@ -637,21 +637,6 @@ function handleGlobalMouseUp() {
   isDraggingHue.value = false;
   currentDragType.value = "";
 }
-
-// --- Click outside logic for color panels ---
-function useClickOutside(refs, closeFn) {
-  function handler(e) {
-    if (refs.some((r) => r.value && r.value.contains(e.target))) return;
-    closeFn();
-  }
-  onMounted(() => document.addEventListener("mousedown", handler));
-  onBeforeUnmount(() => document.removeEventListener("mousedown", handler));
-}
-
-const textColorPanelRef = ref(null);
-const hilitePanelRef = ref(null);
-useClickOutside([textColorPanelRef], () => (showTextColorPanel.value = false));
-useClickOutside([hilitePanelRef], () => (showHilitePanel.value = false));
 
 // Color conversion functions
 function hslToRgb(h, s, l) {
@@ -786,4 +771,17 @@ function updateHiliteColor() {
   hiliteColor.value = rgbToHex(rgb.r, rgb.g, rgb.b);
   applyHiliteColor();
 }
+
+// Click outside logic for color panels
+function useClickOutside(refs, closeFn) {
+  function handler(e) {
+    if (refs.some((r) => r.value && r.value.contains(e.target))) return;
+    closeFn();
+  }
+  onMounted(() => document.addEventListener("mousedown", handler));
+  onBeforeUnmount(() => document.removeEventListener("mousedown", handler));
+}
+
+useClickOutside([textColorPanelRef], () => (showTextColorPanel.value = false));
+useClickOutside([hilitePanelRef], () => (showHilitePanel.value = false));
 </script>

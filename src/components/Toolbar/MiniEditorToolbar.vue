@@ -17,6 +17,7 @@
     <!-- Text color -->
     <button
       v-if="showTextColor"
+      ref="textColorBtnRef"
       @click="$emit('toggleTextColor')"
       :class="toolbarBtn('foreColor')"
       :title="translations[currentLang].textColor"
@@ -28,6 +29,7 @@
     <!-- Highlight color -->
     <button
       v-if="showHighlight"
+      ref="highlightBtnRef"
       @click="$emit('toggleHighlight')"
       :class="toolbarBtn('hiliteColor')"
       :title="translations[currentLang].highlight"
@@ -239,7 +241,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, defineExpose } from 'vue'
 import Icon from '../icons/Icon.vue'
 
 // Language configuration
@@ -293,6 +295,11 @@ const emit = defineEmits([
   'clearFormatting',
   'preview'
 ])
+
+// Refs for popper anchors
+const textColorBtnRef = ref(null)
+const highlightBtnRef = ref(null)
+defineExpose({ textColorBtnRef, highlightBtnRef })
 
 function toolbarBtn(cmd = null, active = false) {
   return [
