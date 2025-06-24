@@ -415,12 +415,22 @@ function applyHiliteColor() {
   format("hiliteColor", hiliteColor.value);
 }
 
+function cleanEditorOutput(html) {
+  // Remove all --tw-... variables from style attributes
+  html = html.replace(/--tw-[^:;]+:[^;]+;?/g, '');
+  // Remove any Tailwind classes (if they sneak in)
+  html = html.replace(/class="[^"]*?tw-[^"]*?"/g, '');
+  return html;
+}
+
 function updateValue() {
   // Remove orphaned media remove buttons before saving
   Array.from(editor.value.querySelectorAll(".media-remove-btn")).forEach(
     (btn) => btn.remove()
   );
-  currentValue.value = editor.value.innerHTML;
+  // Clean the output before emitting
+  const cleaned = cleanEditorOutput(editor.value.innerHTML);
+  currentValue.value = cleaned;
   updateActiveFormats();
 }
 
