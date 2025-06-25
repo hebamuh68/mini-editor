@@ -385,40 +385,30 @@ function formatHeading(level) {
   if (!selection || selection.rangeCount === 0) return;
   const range = selection.getRangeAt(0);
 
-  // Find the block element (p, div, h1-h6, etc.)
+  // Find the block element
   let node = selection.anchorNode;
   while (node && node !== editor.value && !(node.nodeType === 1 && /^(P|DIV|H[1-6])$/i.test(node.nodeName))) {
     node = node.parentNode;
   }
   if (!node || node === editor.value) return;
 
-  // If already the same heading, revert to paragraph
-  if (node.nodeType === 1 && node.nodeName === ('H' + level).toUpperCase()) {
-    const p = document.createElement('p');
-    p.className = 'text-base leading-relaxed';
-    p.innerHTML = node.innerHTML;
-    node.parentNode.replaceChild(p, node);
-    // Move cursor to new p
-    placeCursorAtStart(p);
-    updateValue();
-    updateActiveFormats();
-    return;
-  }
-
-  // Otherwise, create the heading
-  const heading = document.createElement('h' + level);
-  const headingClasses = {
-    1: 'text-3xl font-bold',
-    2: 'text-2xl font-semibold',
-    3: 'text-xl font-semibold',
-    4: 'text-lg font-medium',
-    5: 'text-base font-medium',
-    6: 'text-sm font-medium'
+  // Heading classes configuration
+  const headingConfig = {
+    1: 'text-4xl font-bold mt-8 mb-4',
+    2: 'text-3xl font-bold mt-6 mb-3',
+    3: 'text-2xl font-semibold mt-5 mb-2.5',
+    4: 'text-xl font-semibold mt-4 mb-2',
+    5: 'text-lg font-medium mt-3 mb-1.5',
+    6: 'text-base font-medium mt-2 mb-1'
   };
-  heading.className = headingClasses[level] || 'text-base font-medium';
+
+  // Create or update the heading
+  const heading = document.createElement('div');
+  heading.className = headingConfig[level] || 'text-base font-medium';
+  heading.dataset.headingLevel = level; // Store heading level as data attribute
   heading.innerHTML = node.innerHTML;
+  
   node.parentNode.replaceChild(heading, node);
-  // Move cursor to new heading
   placeCursorAtStart(heading);
   updateValue();
   updateActiveFormats();
@@ -441,7 +431,7 @@ function updateActiveFormats() {
 
   const formats = {};
   
-  // Check for bold, italic, underline, strikethrough
+  // Basic formatting states
   formats.bold = document.queryCommandState('bold');
   formats.italic = document.queryCommandState('italic');
   formats.underline = document.queryCommandState('underline');
@@ -450,8 +440,8 @@ function updateActiveFormats() {
   // Check for headings
   let node = selection.anchorNode;
   while (node && node !== editor.value) {
-    if (node.nodeType === 1 && /^H[1-6]$/i.test(node.nodeName)) {
-      const level = node.nodeName.charAt(1);
+    if (node.nodeType === 1 && node.dataset?.headingLevel) {
+      const level = node.dataset.headingLevel;
       formats[`heading${level}`] = true;
       break;
     }
@@ -569,31 +559,37 @@ function ensureHeadingClasses() {
 function ensureTailwindClasses() {
   if (!editor.value) return;
   
-  // Ensure headings have proper classes
-  ensureHeadingClasses();
-  
-  // Ensure paragraphs have proper classes
-  const paragraphs = editor.value.querySelectorAll('p');
-  paragraphs.forEach(p => {
-    if (!p.className.includes('text-base')) {
-      p.className = 'text-base leading-relaxed';
+  // Process all content blocks
+  const blocks = editor.value.querySelectorAll('div, p');
+  blocks.forEach(block => {
+    // Skip if already processed
+    if (block.dataset?.processed) return;
+    
+    // Handle headings
+    if (block.dataset?.headingLevel) {
+      const level = block.dataset.headingLevel;
+      const headingConfig = {
+        1: 'text-4xl font-bold mt-8 mb-4',
+        2: 'text-3xl font-bold mt-6 mb-3',
+        3: 'text-2xl font-semibold mt-5 mb-2.5',
+        4: 'text-xl font-semibold mt-4 mb-2',
+        5: 'text-lg font-medium mt-3 mb-1.5',
+        6: 'text-base font-medium mt-2 mb-1'
+      };
+      block.className = headingConfig[level] || 'text-base font-medium';
+    } 
+    // Handle paragraphs
+    else if (block.tagName === 'P') {
+      block.className = 'text-base leading-relaxed my-3';
     }
+    
+    block.dataset.processed = 'true';
   });
-  
+
   // Ensure links have proper classes
   const links = editor.value.querySelectorAll('a');
   links.forEach(link => {
-    if (!link.className.includes('text-blue-600')) {
-      link.className = 'text-blue-600 underline hover:text-blue-800 transition';
-    }
-  });
-  
-  // Ensure the editor container has proper spacing
-  const children = Array.from(editor.value.children);
-  children.forEach((child, index) => {
-    if (index > 0 && !child.className.includes('mt-4')) {
-      child.className += ' mt-4';
-    }
+    link.className = 'text-blue-600 underline hover:text-blue-800 transition';
   });
 }
 
@@ -688,10 +684,7 @@ function clearFormatting() {
   if (!editor.value) return;
   editor.value.focus();
 
-  // Get the current selection
   const selection = window.getSelection();
-
-  // If there's no selection, select the entire content
   if (!selection || selection.isCollapsed) {
     const range = document.createRange();
     range.selectNodeContents(editor.value);
@@ -702,35 +695,16 @@ function clearFormatting() {
   // Remove all formatting
   document.execCommand("removeFormat", false, null);
 
-  // Remove headings by converting to paragraphs
-  const walker = document.createTreeWalker(
-    editor.value,
-    NodeFilter.SHOW_ELEMENT,
-    {
-      acceptNode: function (node) {
-        return /^H[1-6]$/i.test(node.nodeName)
-          ? NodeFilter.FILTER_ACCEPT
-          : NodeFilter.FILTER_SKIP;
-      },
-    }
-  );
-
-  const headings = [];
-  let node;
-  while ((node = walker.nextNode())) {
-    headings.push(node);
-  }
-
-  headings.forEach((heading) => {
-    const p = document.createElement("p");
+  // Convert headings to paragraphs
+  const headings = editor.value.querySelectorAll('[data-heading-level]');
+  headings.forEach(heading => {
+    const p = document.createElement('p');
+    p.className = 'text-base leading-relaxed my-3';
     p.innerHTML = heading.innerHTML;
     heading.parentNode.replaceChild(p, heading);
   });
 
-  // Clear the selection
   selection.removeAllRanges();
-
-  // Update the value
   updateValue();
 }
 
