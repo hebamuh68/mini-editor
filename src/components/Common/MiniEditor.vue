@@ -380,67 +380,57 @@ function format(command, value = null) {
 function formatHeading(level) {
   if (!editor.value) return;
   editor.value.focus();
-  
-  // Remove any existing heading formatting first
+
   const selection = window.getSelection();
-  if (selection && selection.rangeCount > 0) {
-    let node = selection.anchorNode;
-    while (node && node !== editor.value) {
-      if (node.nodeType === 1 && /^H[1-6]$/i.test(node.nodeName)) {
-        // If clicking the same heading level, remove formatting
-        if (node.nodeName.toLowerCase() === "h" + level) {
-          const p = document.createElement("p");
-          p.className = 'text-base leading-relaxed';
-          p.innerHTML = node.innerHTML;
-          node.parentNode.replaceChild(p, node);
-          updateValue();
-          updateActiveFormats();
-          return;
-        }
-        // Otherwise, change to new heading level
-        const newHeading = document.createElement("H" + level);
-        const headingClasses = {
-          1: 'text-3xl font-bold',
-          2: 'text-2xl font-semibold',
-          3: 'text-xl font-semibold',
-          4: 'text-lg font-medium',
-          5: 'text-base font-medium'
-        };
-        newHeading.className = headingClasses[level] || 'text-base font-medium';
-        newHeading.innerHTML = node.innerHTML;
-        node.parentNode.replaceChild(newHeading, node);
-        updateValue();
-        updateActiveFormats();
-        return;
-      }
-      node = node.parentNode;
-    }
+  if (!selection || selection.rangeCount === 0) return;
+  const range = selection.getRangeAt(0);
+
+  // Find the block element (p, div, h1-h6, etc.)
+  let node = selection.anchorNode;
+  while (node && node !== editor.value && !(node.nodeType === 1 && /^(P|DIV|H[1-6])$/i.test(node.nodeName))) {
+    node = node.parentNode;
   }
-  
-  // If no existing heading, create new one
-  try {
-    document.execCommand("formatBlock", false, "H" + level);
-    
-    // Add Tailwind classes to the new heading
-    setTimeout(() => {
-      const headings = editor.value.querySelectorAll(`h${level}`);
-      if (headings.length > 0) {
-        const heading = headings[headings.length - 1]; // Get the most recently created heading
-        const headingClasses = {
-          1: 'text-3xl font-bold',
-          2: 'text-2xl font-semibold',
-          3: 'text-xl font-semibold',
-          4: 'text-lg font-medium',
-          5: 'text-base font-medium'
-        };
-        heading.className = headingClasses[level] || 'text-base font-medium';
-        updateValue();
-      }
-    }, 0);
-  } catch (e) {
-    document.execCommand("formatBlock", false, "<H" + level + ">");
+  if (!node || node === editor.value) return;
+
+  // If already the same heading, revert to paragraph
+  if (node.nodeType === 1 && node.nodeName === ('H' + level).toUpperCase()) {
+    const p = document.createElement('p');
+    p.className = 'text-base leading-relaxed';
+    p.innerHTML = node.innerHTML;
+    node.parentNode.replaceChild(p, node);
+    // Move cursor to new p
+    placeCursorAtStart(p);
+    updateValue();
+    updateActiveFormats();
+    return;
   }
+
+  // Otherwise, create the heading
+  const heading = document.createElement('h' + level);
+  const headingClasses = {
+    1: 'text-3xl font-bold',
+    2: 'text-2xl font-semibold',
+    3: 'text-xl font-semibold',
+    4: 'text-lg font-medium',
+    5: 'text-base font-medium',
+    6: 'text-sm font-medium'
+  };
+  heading.className = headingClasses[level] || 'text-base font-medium';
+  heading.innerHTML = node.innerHTML;
+  node.parentNode.replaceChild(heading, node);
+  // Move cursor to new heading
+  placeCursorAtStart(heading);
+  updateValue();
   updateActiveFormats();
+}
+
+function placeCursorAtStart(el) {
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  range.collapse(true);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
 }
 
 function updateActiveFormats() {
