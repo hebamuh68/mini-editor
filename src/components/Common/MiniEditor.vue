@@ -422,28 +422,24 @@ function formatHeading(level) {
     document.execCommand("formatBlock", false, "H" + level);
     
     // Add Tailwind classes to the new heading
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      let node = selection.anchorNode;
-      while (node && node !== editor.value) {
-        if (node.nodeType === 1 && /^H[1-6]$/i.test(node.nodeName)) {
-          const headingClasses = {
-            1: 'text-3xl font-bold',
-            2: 'text-2xl font-semibold',
-            3: 'text-xl font-semibold',
-            4: 'text-lg font-medium',
-            5: 'text-base font-medium'
-          };
-          node.className = headingClasses[level] || 'text-base font-medium';
-          break;
-        }
-        node = node.parentNode;
+    setTimeout(() => {
+      const headings = editor.value.querySelectorAll(`h${level}`);
+      if (headings.length > 0) {
+        const heading = headings[headings.length - 1]; // Get the most recently created heading
+        const headingClasses = {
+          1: 'text-3xl font-bold',
+          2: 'text-2xl font-semibold',
+          3: 'text-xl font-semibold',
+          4: 'text-lg font-medium',
+          5: 'text-base font-medium'
+        };
+        heading.className = headingClasses[level] || 'text-base font-medium';
+        updateValue();
       }
-    }
+    }, 0);
   } catch (e) {
     document.execCommand("formatBlock", false, "<H" + level + ">");
   }
-  updateValue();
   updateActiveFormats();
 }
 
@@ -558,8 +554,33 @@ function cleanEditorOutput(html) {
   return html;
 }
 
+function ensureHeadingClasses() {
+  if (!editor.value) return;
+  
+  // Ensure all headings have proper Tailwind classes
+  const headings = editor.value.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  headings.forEach(heading => {
+    const level = parseInt(heading.tagName.charAt(1));
+    const headingClasses = {
+      1: 'text-3xl font-bold',
+      2: 'text-2xl font-semibold',
+      3: 'text-xl font-semibold',
+      4: 'text-lg font-medium',
+      5: 'text-base font-medium',
+      6: 'text-sm font-medium'
+    };
+    
+    if (!heading.className.includes('text-')) {
+      heading.className = headingClasses[level] || 'text-base font-medium';
+    }
+  });
+}
+
 function ensureTailwindClasses() {
   if (!editor.value) return;
+  
+  // Ensure headings have proper classes
+  ensureHeadingClasses();
   
   // Ensure paragraphs have proper classes
   const paragraphs = editor.value.querySelectorAll('p');
@@ -756,6 +777,11 @@ onMounted(() => {
   hiliteHue.value = hiliteHsl.h;
   hiliteSaturation.value = hiliteHsl.s;
   hiliteLightness.value = hiliteHsl.l;
+  
+  // Ensure all elements have proper Tailwind classes
+  nextTick(() => {
+    ensureTailwindClasses();
+  });
   
   // Add global mouse event listeners for drag functionality
   document.addEventListener("mousemove", handleGlobalMouseMove);
