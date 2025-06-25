@@ -93,8 +93,8 @@
               class="color-preview"
               :style="{ backgroundColor: textColor }"
             ></div>
+            </div>
           </div>
-        </div>
         <div v-if="showHilitePanel" ref="hilitePanelRef"
           :class="['color-panel-root', 'absolute z-30', props.rtl ? 'right-0' : 'left-0']">
             <div class="color-picker-advanced">
@@ -132,8 +132,8 @@
               class="color-preview"
               :style="{ backgroundColor: hiliteColor }"
             ></div>
+            </div>
           </div>
-        </div>
         <!-- Editor Area -->
         <div
         ref="editor"
@@ -147,7 +147,7 @@
           @paste="handlePaste"
         ></div>
       </div>
-    </div>
+      </div>
 
     <!-- Media Uploader Modal -->
     <MediaUploader
@@ -326,8 +326,47 @@ function switchLanguage(lang) {
 function format(command, value = null) {
   if (!editor.value) return;
   editor.value.focus();
+  
   try {
     document.execCommand(command, false, value);
+    
+    // Add Tailwind classes based on the command
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const container = range.commonAncestorContainer;
+      
+      // Find the affected element
+      let element = container.nodeType === 1 ? container : container.parentElement;
+      while (element && element !== editor.value && !element.matches) {
+        element = element.parentElement;
+      }
+      
+      if (element && element.matches) {
+        switch (command) {
+          case 'bold':
+            if (element.tagName === 'B' || element.tagName === 'STRONG') {
+              element.className = 'font-bold';
+            }
+            break;
+          case 'italic':
+            if (element.tagName === 'I' || element.tagName === 'EM') {
+              element.className = 'italic';
+            }
+            break;
+          case 'underline':
+            if (element.tagName === 'U') {
+              element.className = 'underline';
+            }
+            break;
+          case 'strikeThrough':
+            if (element.tagName === 'S' || element.tagName === 'STRIKE') {
+              element.className = 'line-through';
+            }
+            break;
+        }
+      }
+    }
   } catch (e) {
     // fallback for headings
     if (command === "formatBlock" && value && !value.startsWith("<")) {
@@ -351,6 +390,7 @@ function formatHeading(level) {
         // If clicking the same heading level, remove formatting
         if (node.nodeName.toLowerCase() === "h" + level) {
           const p = document.createElement("p");
+          p.className = 'text-base leading-relaxed';
           p.innerHTML = node.innerHTML;
           node.parentNode.replaceChild(p, node);
           updateValue();
@@ -359,6 +399,14 @@ function formatHeading(level) {
         }
         // Otherwise, change to new heading level
         const newHeading = document.createElement("H" + level);
+        const headingClasses = {
+          1: 'text-3xl font-bold',
+          2: 'text-2xl font-semibold',
+          3: 'text-xl font-semibold',
+          4: 'text-lg font-medium',
+          5: 'text-base font-medium'
+        };
+        newHeading.className = headingClasses[level] || 'text-base font-medium';
         newHeading.innerHTML = node.innerHTML;
         node.parentNode.replaceChild(newHeading, node);
         updateValue();
@@ -372,6 +420,26 @@ function formatHeading(level) {
   // If no existing heading, create new one
   try {
     document.execCommand("formatBlock", false, "H" + level);
+    
+    // Add Tailwind classes to the new heading
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      let node = selection.anchorNode;
+      while (node && node !== editor.value) {
+        if (node.nodeType === 1 && /^H[1-6]$/i.test(node.nodeName)) {
+          const headingClasses = {
+            1: 'text-3xl font-bold',
+            2: 'text-2xl font-semibold',
+            3: 'text-xl font-semibold',
+            4: 'text-lg font-medium',
+            5: 'text-base font-medium'
+          };
+          node.className = headingClasses[level] || 'text-base font-medium';
+          break;
+        }
+        node = node.parentNode;
+      }
+    }
   } catch (e) {
     document.execCommand("formatBlock", false, "<H" + level + ">");
   }
@@ -409,18 +477,113 @@ function updateActiveFormats() {
 
 function applyTextColor() {
   format("foreColor", textColor.value);
+  
+  // Add Tailwind color class
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    const container = range.commonAncestorContainer;
+    let element = container.nodeType === 1 ? container : container.parentElement;
+    
+    while (element && element !== editor.value && !element.matches) {
+      element = element.parentElement;
+    }
+    
+    if (element && element.matches) {
+      // Convert hex color to Tailwind class (simplified mapping)
+      const colorMap = {
+        '#000000': 'text-black',
+        '#ffffff': 'text-white',
+        '#ef4444': 'text-red-500',
+        '#f97316': 'text-orange-500',
+        '#eab308': 'text-yellow-500',
+        '#22c55e': 'text-green-500',
+        '#3b82f6': 'text-blue-500',
+        '#8b5cf6': 'text-purple-500',
+        '#ec4899': 'text-pink-500'
+      };
+      
+      const tailwindClass = colorMap[textColor.value.toLowerCase()];
+      if (tailwindClass) {
+        element.className = tailwindClass;
+      }
+    }
+  }
 }
 
 function applyHiliteColor() {
   format("hiliteColor", hiliteColor.value);
+  
+  // Add Tailwind highlight class
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    const container = range.commonAncestorContainer;
+    let element = container.nodeType === 1 ? container : container.parentElement;
+    
+    while (element && element !== editor.value && !element.matches) {
+      element = element.parentElement;
+    }
+    
+    if (element && element.matches) {
+      // Convert hex color to Tailwind background class
+      const colorMap = {
+        '#ffff00': 'bg-yellow-200',
+        '#ffeb3b': 'bg-yellow-300',
+        '#ffc107': 'bg-yellow-400',
+        '#ff9800': 'bg-orange-400',
+        '#ff5722': 'bg-red-400',
+        '#e91e63': 'bg-pink-400',
+        '#9c27b0': 'bg-purple-400',
+        '#3f51b5': 'bg-indigo-400',
+        '#2196f3': 'bg-blue-400',
+        '#00bcd4': 'bg-cyan-400',
+        '#009688': 'bg-teal-400',
+        '#4caf50': 'bg-green-400',
+        '#8bc34a': 'bg-lime-400'
+      };
+      
+      const tailwindClass = colorMap[hiliteColor.value.toLowerCase()];
+      if (tailwindClass) {
+        element.className = tailwindClass + ' px-1 py-0.5 rounded';
+      }
+    }
+  }
 }
 
 function cleanEditorOutput(html) {
   // Remove all --tw-... variables from style attributes
   html = html.replace(/--tw-[^:;]+:[^;]+;?/g, '');
-  // Remove any Tailwind classes (if they sneak in)
-  html = html.replace(/class="[^"]*?tw-[^"]*?"/g, '');
+  // DO NOT remove Tailwind classes - we want to keep them
   return html;
+}
+
+function ensureTailwindClasses() {
+  if (!editor.value) return;
+  
+  // Ensure paragraphs have proper classes
+  const paragraphs = editor.value.querySelectorAll('p');
+  paragraphs.forEach(p => {
+    if (!p.className.includes('text-base')) {
+      p.className = 'text-base leading-relaxed';
+    }
+  });
+  
+  // Ensure links have proper classes
+  const links = editor.value.querySelectorAll('a');
+  links.forEach(link => {
+    if (!link.className.includes('text-blue-600')) {
+      link.className = 'text-blue-600 underline hover:text-blue-800 transition';
+    }
+  });
+  
+  // Ensure the editor container has proper spacing
+  const children = Array.from(editor.value.children);
+  children.forEach((child, index) => {
+    if (index > 0 && !child.className.includes('mt-4')) {
+      child.className += ' mt-4';
+    }
+  });
 }
 
 function updateValue() {
@@ -428,6 +591,10 @@ function updateValue() {
   Array.from(editor.value.querySelectorAll(".media-remove-btn")).forEach(
     (btn) => btn.remove()
   );
+  
+  // Ensure Tailwind classes are applied
+  ensureTailwindClasses();
+  
   // Clean the output before emitting
   const cleaned = cleanEditorOutput(editor.value.innerHTML);
   currentValue.value = cleaned;
@@ -443,7 +610,12 @@ function handlePaste(event) {
   
   // Insert the pasted content
   document.execCommand('insertHTML', false, pastedData);
-  updateValue();
+  
+  // Ensure Tailwind classes are applied to pasted content
+  nextTick(() => {
+    ensureTailwindClasses();
+    updateValue();
+  });
 }
 
 function insertMedia(mediaHtml) {
