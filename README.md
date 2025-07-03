@@ -307,6 +307,34 @@ pnpm run test
 pnpm publish
 ```
 
+## Testing
+
+### Unit Tests
+Run the unit tests:
+```bash
+npm run test
+```
+
+### Integration Tests
+Run comprehensive integration tests that simulate real-world package consumption:
+```bash
+npm run test:integration
+```
+
+The integration tests check:
+- ✅ All required files exist in `dist/`
+- ✅ Package.json exports are correctly configured
+- ✅ Import syntax is valid for ES and UMD modules
+- ✅ CSS file is valid and contains expected content
+- ✅ Types field points to existing files
+- ✅ Files field includes all necessary directories
+- ✅ All export paths are valid
+- ✅ Module compatibility (ES/UMD formats)
+- ✅ Package size optimization warnings
+- ✅ Common build issues (source maps, console.log, etc.)
+
+These tests run automatically before publishing to catch issues that would break consumer projects.
+
 ## 📄 License
 
 MIT License - see LICENSE file for details.

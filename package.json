@@ -22,7 +22,8 @@
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "prepublishOnly": "pnpm run build && pnpm run test"
+    "test:integration": "pnpm run build && node test/integration.js && node test/consumer-simulation.js",
+    "prepublishOnly": "pnpm run build && pnpm run test && pnpm run test:integration"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
