@@ -4,7 +4,15 @@
   "description": "A lightweight rich text editor component for Vue 3",
   "main": "dist/mini-editor.umd.js",
   "module": "dist/mini-editor.es.js",
-  "types": "dist/types/index.d.ts",
+  "types": "src/types/index.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/mini-editor.es.js",
+      "require": "./dist/mini-editor.umd.js",
+      "style": "./dist/style.css"
+    }
+  },
+  "style": "dist/style.css",
   "files": [
     "dist",
     "src"
