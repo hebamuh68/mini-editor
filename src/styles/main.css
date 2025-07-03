@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities; 
 
+body {
+  font-family: 'Tajawal', sans-serif;
+}
 
 /* MiniEditor specific styles */
 .editor-area {
@@ -354,4 +357,43 @@
     min-height: 100px;
     font-size: 14px;
   }
+}
+
+/* Resizable image styles */
+.editor-area .resizable-image-wrapper {
+  position: relative;
+  display: block;
+  margin: 1em 0;
+  border: 2px solid transparent;
+  transition: border 0.2s;
+  background: transparent;
+}
+
+.editor-area .resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: se-resize;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: background 0.2s, box-shadow 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.editor-area .resize-handle svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.editor-area .resizable-image-wrapper:hover .resize-handle {
+  opacity: 1;
+  pointer-events: auto;
 }

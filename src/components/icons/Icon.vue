@@ -27,6 +27,7 @@ import FallbackIcon from './FallbackIcon.vue'
 import LangIcon from './LangIcon.vue'
 import MediaIcon from './MediaIcon.vue'
 import PreviewIcon from './PreviewIcon.vue'
+import ExpandIcon from './ExpandIcon.vue'
 import InfoIcon from './InfoIcon.vue'
 
 
@@ -61,7 +62,8 @@ const iconComponent = computed(() => {
     Info: InfoIcon,
     Lang: LangIcon,
     Media: MediaIcon,
-    Preview: PreviewIcon
+    Preview: PreviewIcon,
+    Expand : ExpandIcon
   }
   
   return iconMap[props.name] || FallbackIcon

@@ -237,6 +237,17 @@
     >
       <Icon name="Preview" class="icon" />
     </button>
+
+    <!-- Expand/Fullscreen -->
+    <button
+      v-if="showFullscreen"
+      type="button"
+      class="toolbar-btn"
+      :title="'Expand/Fullscreen'"
+      @click="$emit('toggleFullscreen')"
+    >
+      <Icon name="Expand" class="icon" />
+    </button>
   </div>
 </template>
 
@@ -278,6 +289,7 @@ const props = defineProps({
   showRedo: { type: Boolean, default: true },
   showClearFormatting: { type: Boolean, default: true },
   showPreview: { type: Boolean, default: true },
+  showFullscreen: { type: Boolean, default: true },
   // Active state tracking
   activeFormats: {
     type: Object,
@@ -293,7 +305,8 @@ const emit = defineEmits([
   'formatHeading',
   'insertMedia',
   'clearFormatting',
-  'preview'
+  'preview',
+  'toggleFullscreen'
 ])
 
 // Refs for popper anchors

@@ -1,7 +1,7 @@
 <template>
   <div class="inline-flex flex-col justify-start items-end w-full">
     <div class="bg-white rounded-xl border border-gray-200 editor-container">
-          <!-- Dynamic Label -->
+      <!-- Dynamic Label -->
       <label
         v-if="label"
         class="border-b border-gray-200 p-2 ps-4 pe-4 mb-2 w-full flex items-center text-start text-[#261E27] text-base font-tajawal font-normal"
@@ -21,7 +21,6 @@
         {{ label }}
         <span v-if="required" class="text-red-600 ms-1">*</span>
       </label>
-    
       <div class="p-4 relative">
         <!-- Toolbar -->
         <MiniEditorToolbar
@@ -46,6 +45,7 @@
           :show-redo="showRedo"
           :show-clear-formatting="showClearFormatting"
           :show-preview="showPreview"
+          :show-fullscreen="false"
           @switch-language="switchLanguage"
           @toggle-text-color="showTextColorPanel = !showTextColorPanel"
           @toggle-highlight="showHilitePanel = !showHilitePanel"
@@ -53,7 +53,7 @@
           @format-heading="formatHeading"
           @insert-media="showMediaUploader = true"
           @clear-formatting="clearFormatting"
-          @preview="showPreviewModal = true"
+          @preview="openPreviewModal"
         />
         <!-- Color Panels -->
         <div v-if="showTextColorPanel" ref="textColorPanelRef"
@@ -147,25 +147,36 @@
           @paste="handlePaste"
         ></div>
       </div>
-      </div>
-
+    </div>
     <!-- Media Uploader Modal -->
     <MediaUploader
       :is-visible="showMediaUploader"
       :current-lang="currentLang"
-      :translations="props.translations"
       @close="showMediaUploader = false"
       @insert="insertMedia"
     />
-
     <!-- Preview Modal -->
-    <MiniEditorPreview
-      :is-visible="showPreviewModal"
-      :content-ar="modelValue.ar"
-      :content-en="modelValue.en"
-      :language="currentLang"
-      @close="showPreviewModal = false"
-    />
+    <div v-if="showPreviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-tajawal">
+      <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 relative font-tajawal">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200 relative font-tajawal">
+          <h3 class="text-2xl font-semibold text-center w-full font-tajawal">Preview</h3>
+          <button @click="showPreviewModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors font-tajawal">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="p-6 font-tajawal max-h-[70vh] overflow-auto">
+          <MiniEditorPreview
+            :is-visible="true"
+            :contentAr="modelValue.ar"
+            :contentEn="modelValue.en"
+            :language="currentLang"
+            @close="showPreviewModal = false"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -265,6 +276,7 @@ const props = defineProps({
   showRedo: { type: Boolean, default: true },
   showClearFormatting: { type: Boolean, default: true },
   showPreview: { type: Boolean, default: true },
+  showFullscreen: { type: Boolean, default: true },
   rtl: { type: Boolean, default: false },
 });
 
@@ -324,9 +336,17 @@ function switchLanguage(lang) {
 }
 
 function format(command, value = null) {
-  if (!editor.value) return;
-  editor.value.focus();
-  
+  const activeEditor = editor.value;
+  if (!activeEditor) return;
+  activeEditor.focus();
+
+  if (command === 'undo' || command === 'redo') {
+    document.execCommand(command);
+    // Do NOT call updateValue() here; let the browser handle the DOM and only sync on input/blur
+    updateActiveFormats();
+    return;
+  }
+
   try {
     document.execCommand(command, false, value);
     
@@ -338,7 +358,7 @@ function format(command, value = null) {
       
       // Find the affected element
       let element = container.nodeType === 1 ? container : container.parentElement;
-      while (element && element !== editor.value && !element.matches) {
+      while (element && element !== activeEditor && !element.matches) {
         element = element.parentElement;
       }
       
@@ -373,26 +393,23 @@ function format(command, value = null) {
       document.execCommand(command, false, "<" + value + ">");
     }
   }
-  updateValue();
   updateActiveFormats();
 }
 
 function formatHeading(level) {
-  if (!editor.value) return;
-  editor.value.focus();
-
+  const activeEditor = editor.value;
+  if (!activeEditor) return;
+  activeEditor.focus();
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
   const range = selection.getRangeAt(0);
 
   // Find the block element
   let node = selection.anchorNode;
-  while (node && node !== editor.value && !(node.nodeType === 1 && /^(P|DIV|H[1-6])$/i.test(node.nodeName))) {
+  while (node && node !== activeEditor && !(node.nodeType === 1 && /^(P|DIV|H[1-6])$/i.test(node.nodeName))) {
     node = node.parentNode;
   }
-  if (!node || node === editor.value) return;
 
-  // Heading classes configuration
   const headingConfig = {
     1: 'text-4xl font-bold mt-8 mb-4',
     2: 'text-3xl font-bold mt-6 mb-3',
@@ -401,15 +418,41 @@ function formatHeading(level) {
     5: 'text-lg font-medium mt-3 mb-1.5',
     6: 'text-base font-medium mt-2 mb-1'
   };
+  const tag = `h${level}`;
 
-  // Create or update the heading
-  const heading = document.createElement('div');
+  if (!node || node === activeEditor) {
+    // No block found: create a new heading at the cursor
+    const heading = document.createElement(tag);
+    heading.className = headingConfig[level] || 'text-base font-medium';
+    // If there's a selection, move its contents into the heading
+    if (!selection.isCollapsed) {
+      heading.appendChild(range.extractContents());
+    } else {
+      heading.innerHTML = '<br>';
+    }
+    range.insertNode(heading);
+    // Place cursor at end
+    const newRange = document.createRange();
+    newRange.selectNodeContents(heading);
+    newRange.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+    updateValue();
+    updateActiveFormats();
+    return;
+  }
+
+  // Block found: replace it with a heading
+  const heading = document.createElement(tag);
   heading.className = headingConfig[level] || 'text-base font-medium';
-  heading.dataset.headingLevel = level; // Store heading level as data attribute
   heading.innerHTML = node.innerHTML;
-  
   node.parentNode.replaceChild(heading, node);
-  placeCursorAtStart(heading);
+  // Place cursor at end
+  const newRange = document.createRange();
+  newRange.selectNodeContents(heading);
+  newRange.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(newRange);
   updateValue();
   updateActiveFormats();
 }
@@ -424,7 +467,8 @@ function placeCursorAtStart(el) {
 }
 
 function updateActiveFormats() {
-  if (!editor.value) return;
+  const activeEditor = editor.value;
+  if (!activeEditor) return;
   
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
@@ -439,9 +483,9 @@ function updateActiveFormats() {
   
   // Check for headings
   let node = selection.anchorNode;
-  while (node && node !== editor.value) {
-    if (node.nodeType === 1 && node.dataset?.headingLevel) {
-      const level = node.dataset.headingLevel;
+  while (node && node !== activeEditor) {
+    if (node.nodeType === 1 && /^H[1-6]$/i.test(node.tagName)) {
+      const level = node.tagName.charAt(1);
       formats[`heading${level}`] = true;
       break;
     }
@@ -461,7 +505,7 @@ function applyTextColor() {
     const container = range.commonAncestorContainer;
     let element = container.nodeType === 1 ? container : container.parentElement;
     
-    while (element && element !== editor.value && !element.matches) {
+    while (element && element !== activeEditor && !element.matches) {
       element = element.parentElement;
     }
     
@@ -497,7 +541,7 @@ function applyHiliteColor() {
     const container = range.commonAncestorContainer;
     let element = container.nodeType === 1 ? container : container.parentElement;
     
-    while (element && element !== editor.value && !element.matches) {
+    while (element && element !== activeEditor && !element.matches) {
       element = element.parentElement;
     }
     
@@ -534,40 +578,19 @@ function cleanEditorOutput(html) {
   return html;
 }
 
-function ensureHeadingClasses() {
-  if (!editor.value) return;
-  
-  // Ensure all headings have proper Tailwind classes
-  const headings = editor.value.querySelectorAll('h1, h2, h3, h4, h5, h6');
-  headings.forEach(heading => {
-    const level = parseInt(heading.tagName.charAt(1));
-    const headingClasses = {
-      1: 'text-3xl font-bold',
-      2: 'text-2xl font-semibold',
-      3: 'text-xl font-semibold',
-      4: 'text-lg font-medium',
-      5: 'text-base font-medium',
-      6: 'text-sm font-medium'
-    };
-    
-    if (!heading.className.includes('text-')) {
-      heading.className = headingClasses[level] || 'text-base font-medium';
-    }
-  });
-}
-
 function ensureTailwindClasses() {
-  if (!editor.value) return;
+  const activeEditor = editor.value;
+  if (!activeEditor) return;
   
   // Process all content blocks
-  const blocks = editor.value.querySelectorAll('div, p');
+  const blocks = activeEditor.querySelectorAll('div, p, h1, h2, h3, h4, h5, h6');
   blocks.forEach(block => {
     // Skip if already processed
     if (block.dataset?.processed) return;
     
     // Handle headings
-    if (block.dataset?.headingLevel) {
-      const level = block.dataset.headingLevel;
+    if (/^H[1-6]$/i.test(block.tagName)) {
+      const level = block.tagName.charAt(1);
       const headingConfig = {
         1: 'text-4xl font-bold mt-8 mb-4',
         2: 'text-3xl font-bold mt-6 mb-3',
@@ -587,15 +610,18 @@ function ensureTailwindClasses() {
   });
 
   // Ensure links have proper classes
-  const links = editor.value.querySelectorAll('a');
+  const links = activeEditor.querySelectorAll('a');
   links.forEach(link => {
     link.className = 'text-blue-600 underline hover:text-blue-800 transition';
   });
 }
 
 function updateValue() {
+  const activeEditor = editor.value;
+  if (!activeEditor) return;
+  
   // Remove orphaned media remove buttons before saving
-  Array.from(editor.value.querySelectorAll(".media-remove-btn")).forEach(
+  Array.from(activeEditor.querySelectorAll(".media-remove-btn")).forEach(
     (btn) => btn.remove()
   );
   
@@ -603,7 +629,7 @@ function updateValue() {
   ensureTailwindClasses();
   
   // Clean the output before emitting
-  const cleaned = cleanEditorOutput(editor.value.innerHTML);
+  const cleaned = cleanEditorOutput(activeEditor.innerHTML);
   currentValue.value = cleaned;
   updateActiveFormats();
 }
@@ -626,32 +652,72 @@ function handlePaste(event) {
 }
 
 function insertMedia(mediaHtml) {
-  if (!editor.value) return;
-  
-  editor.value.focus();
-  
+  const activeEditor = editor.value;
+  if (!activeEditor) return;
+  activeEditor.focus();
   // Create a temporary div to parse the HTML
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = mediaHtml;
-  
   // Insert the media element
   const mediaElement = tempDiv.firstElementChild;
   if (mediaElement) {
-    // Add remove button for images and videos
-    if (mediaElement.tagName === 'IMG' || mediaElement.tagName === 'VIDEO') {
+    if (mediaElement.tagName === 'IMG') {
+      // Create resizable wrapper
+      const wrapper = document.createElement('span');
+      wrapper.className = 'resizable-image-wrapper';
+      wrapper.style.display = 'inline-block';
+      wrapper.style.position = 'relative';
+      // Add image
+      wrapper.appendChild(mediaElement);
+      // Add resize handle
+      const handle = document.createElement('span');
+      handle.className = 'resize-handle';
+      // Use ResizeIcon SVG for clarity
+      handle.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#082F49"/><path d="M8.38439 13.1843L4.86719 16.8215L2.39999 13.9067V21.5999H10.0644L7.14839 19.1027L10.7844 15.5843L8.38439 13.1843ZM13.9356 2.3999L16.8516 4.8971L13.2156 8.4155L15.6156 10.8155L19.1328 7.1783L21.6 10.0931V2.3999H13.9356Z" fill="white"/></svg>`;
+      wrapper.appendChild(handle);
+      // Add remove button
+      wrapper.appendChild(createRemoveButton(wrapper));
+      // Resizing logic
+      let isResizing = false;
+      let startX, startY, startWidth, startHeight;
+      handle.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        isResizing = true;
+        wrapper.classList.add('active');
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = mediaElement.offsetWidth;
+        startHeight = mediaElement.offsetHeight;
+        document.addEventListener('mousemove', resizeMove);
+        document.addEventListener('mouseup', stopResize);
+      });
+      function resizeMove(e) {
+        if (!isResizing) return;
+        const newWidth = Math.max(30, startWidth + (e.clientX - startX));
+        const newHeight = Math.max(30, startHeight + (e.clientY - startY));
+        mediaElement.style.width = newWidth + 'px';
+        mediaElement.style.height = newHeight + 'px';
+      }
+      function stopResize() {
+        isResizing = false;
+        wrapper.classList.remove('active');
+        document.removeEventListener('mousemove', resizeMove);
+        document.removeEventListener('mouseup', stopResize);
+        updateValue();
+      }
+      insertAtCursor(wrapper);
+    } else if (mediaElement.tagName === 'VIDEO') {
       const container = document.createElement('span');
       container.style.display = 'inline-block';
       container.style.position = 'relative';
-      
       container.appendChild(mediaElement);
       container.appendChild(createRemoveButton(container));
-      
       insertAtCursor(container);
     } else {
       insertAtCursor(mediaElement);
     }
   }
-  
   updateValue();
 }
 
@@ -681,13 +747,14 @@ function insertAtCursor(node) {
 }
 
 function clearFormatting() {
-  if (!editor.value) return;
-  editor.value.focus();
+  const activeEditor = editor.value;
+  if (!activeEditor) return;
+  activeEditor.focus();
 
   const selection = window.getSelection();
   if (!selection || selection.isCollapsed) {
     const range = document.createRange();
-    range.selectNodeContents(editor.value);
+    range.selectNodeContents(activeEditor);
     selection.removeAllRanges();
     selection.addRange(range);
   }
@@ -696,7 +763,7 @@ function clearFormatting() {
   document.execCommand("removeFormat", false, null);
 
   // Convert headings to paragraphs
-  const headings = editor.value.querySelectorAll('[data-heading-level]');
+  const headings = activeEditor.querySelectorAll('h1, h2, h3, h4, h5, h6');
   headings.forEach(heading => {
     const p = document.createElement('p');
     p.className = 'text-base leading-relaxed my-3';
@@ -705,7 +772,7 @@ function clearFormatting() {
   });
 
   selection.removeAllRanges();
-  updateValue();
+    updateValue();
 }
 
 watch(
@@ -746,16 +813,9 @@ onMounted(() => {
   nextTick(() => {
     ensureTailwindClasses();
   });
-  
-  // Add global mouse event listeners for drag functionality
-  document.addEventListener("mousemove", handleGlobalMouseMove);
-  document.addEventListener("mouseup", handleGlobalMouseUp);
 });
 
 onBeforeUnmount(() => {
-  // Clean up global event listeners
-  document.removeEventListener("mousemove", handleGlobalMouseMove);
-  document.removeEventListener("mouseup", handleGlobalMouseUp);
   if (textColorPopper) textColorPopper.destroy()
   if (hilitePopper) hilitePopper.destroy()
 });
@@ -956,6 +1016,11 @@ function useClickOutside(refs, closeFn) {
 
 useClickOutside([textColorPanelRef], () => (showTextColorPanel.value = false));
 useClickOutside([hilitePanelRef], () => (showHilitePanel.value = false));
+
+function openPreviewModal() {
+  updateValue();
+  showPreviewModal.value = true;
+}
 </script>
 
 <style scoped>

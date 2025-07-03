@@ -1,41 +1,41 @@
 <template>
-  <div v-if="isVisible" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+  <div v-if="isVisible" class="mini-editor-preview-modal fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
       <!-- Header -->
-      <div class="flex items-center justify-between p-4 border-b border-gray-200">
+      <div class="flex items-center justify-between px-6 py-2 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
         <div class="flex items-center gap-2">
-          <Icon name="Preview" class="icon" />
-          <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            Preview
-          </h3>
+          <Icon name="Preview" class="icon text-blue-600" />
+          <h3 class="text-xl font-bold text-gray-900">Preview</h3>
         </div>
         <button
           @click="$emit('close')"
-          class="text-gray-400 hover:text-gray-600 transition-colors"
+          class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
 
       <!-- Language Toggle -->
-      <div class="flex justify-end p-4 pt-2 gap-2">
-        <button
-          v-for="lang in ['en', 'ar']"
-          :key="lang"
-          :class="[
-            'px-3 py-1 rounded text-sm font-medium border',
-            currentLang === lang ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-          ]"
-          @click="currentLang = lang"
-        >
-          {{ lang === 'en' ? 'English' : 'العربية' }}
-        </button>
+      <div class="flex justify-end px-6 pt-4 gap-2">
+        <div class="inline-flex bg-gray-100 rounded-full p-1">
+          <button
+            v-for="lang in ['en', 'ar']"
+            :key="lang"
+            :class="[
+              'px-4 py-1 rounded-full text-sm font-semibold focus:outline-none transition',
+              currentLang === lang ? 'bg-blue-600 text-white shadow' : 'text-gray-700 hover:bg-gray-200'
+            ]"
+            @click="currentLang = lang"
+          >
+            {{ lang === 'en' ? 'English' : 'العربية' }}
+          </button>
+        </div>
       </div>
 
       <!-- Content -->
-      <div class="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+      <div class="flex-1 p-8 overflow-y-auto">
         <div class="prose max-w-none">
           <div 
             v-html="contentToShow" 
@@ -43,28 +43,6 @@
             :dir="direction"
             :class="direction === 'rtl' ? 'text-right' : 'text-left'"
           ></div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="flex items-center justify-between p-4 border-t border-gray-200">
-        <div class="text-sm text-gray-500">
-          {{ currentLang === 'ar' ? 'العربية' : 'English' }}
-        </div>
-        <div class="flex gap-2 items-center">
-          <button
-            @click="copyToClipboard"
-            class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          >
-            Copy HTML
-          </button>
-          <span v-if="copied" class="text-green-600 text-xs ml-2">Copied!</span>
-          <button
-            @click="$emit('close')"
-            class="px-4 py-2 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>
@@ -103,10 +81,9 @@ const direction = computed(() => {
 })
 
 const contentToShow = computed(() => {
-  if (props.contentAr && props.contentEn) {
-    return currentLang.value === 'ar' ? props.contentAr : props.contentEn
-  }
-  return props.content
+  if (currentLang.value === 'ar') return props.contentAr || ''
+  if (currentLang.value === 'en') return props.contentEn || ''
+  return ''
 })
 
 const copied = ref(false)
@@ -166,5 +143,33 @@ function copyToClipboard() {
 .preview-content audio {
   max-width: 100%;
   border-radius: 4px;
+}
+
+/* Modern modal tweaks */
+.prose {
+  color: #22292f;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #f3f4f6;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+.preview-content .resize-handle,
+.preview-content .media-remove-btn,
+.prose .resize-handle,
+.prose .media-remove-btn {
+  display: none !important;
+}
+</style>
+
+<style>
+.mini-editor-preview-modal .resize-handle,
+.mini-editor-preview-modal .media-remove-btn {
+  display: none !important;
 }
 </style> 
