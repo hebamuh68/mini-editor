@@ -8,9 +8,9 @@
   "exports": {
     ".": {
       "import": "./dist/mini-editor.es.js",
-      "require": "./dist/mini-editor.umd.js",
-      "style": "./dist/style.css"
-    }
+      "require": "./dist/mini-editor.umd.js"
+    },
+    "./dist/style.css": "./dist/style.css"
   },
   "style": "dist/style.css",
   "files": [
