@@ -156,27 +156,29 @@
       @insert="insertMedia"
     />
     <!-- Preview Modal -->
-    <div v-if="showPreviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-tajawal">
-      <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 relative font-tajawal">
-        <div class="flex items-center justify-between p-4 border-b border-gray-200 relative font-tajawal">
-          <h3 class="text-2xl font-semibold text-center w-full font-tajawal">Preview</h3>
-          <button @click="showPreviewModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors font-tajawal">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-        <div class="p-6 font-tajawal max-h-[70vh] overflow-auto">
-          <MiniEditorPreview
-            :is-visible="true"
-            :contentAr="modelValue.ar"
-            :contentEn="modelValue.en"
-            :language="currentLang"
-            @close="showPreviewModal = false"
-          />
+    <Teleport to="body">
+      <div v-if="showPreviewModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 font-tajawal" style="position: fixed !important; z-index: 9999 !important;">
+        <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 relative font-tajawal">
+          <div class="flex items-center justify-between p-4 border-b border-gray-200 relative font-tajawal">
+            <h3 class="text-2xl font-semibold text-center w-full font-tajawal">Preview</h3>
+            <button @click="showPreviewModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors font-tajawal">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="p-6 font-tajawal max-h-[70vh] overflow-auto">
+            <MiniEditorPreview
+              :is-visible="true"
+              :contentAr="modelValue.ar"
+              :contentEn="modelValue.en"
+              :language="currentLang"
+              @close="showPreviewModal = false"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 

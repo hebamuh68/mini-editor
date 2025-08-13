@@ -1,5 +1,6 @@
 <template>
-  <div v-if="isVisible" class="mini-editor-preview-modal fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+  <Teleport to="body">
+    <div v-if="isVisible" class="mini-editor-preview-modal fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="position: fixed !important; z-index: 9999 !important;">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
       <!-- Header -->
       <div class="flex items-center justify-between px-6 py-2 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
@@ -47,6 +48,7 @@
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -171,5 +173,60 @@ function copyToClipboard() {
 .mini-editor-preview-modal .resize-handle,
 .mini-editor-preview-modal .media-remove-btn {
   display: none !important;
+}
+
+/* Ensure modal is always on top and properly positioned */
+.mini-editor-preview-modal {
+  position: fixed !important;
+  z-index: 9999 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  isolation: isolate;
+}
+
+/* Ensure modal content is properly contained */
+.mini-editor-preview-modal > div {
+  position: relative !important;
+  z-index: 10000 !important;
+  max-height: 90vh !important;
+  max-width: 90vw !important;
+}
+
+/* Override any parent container styles that might interfere */
+.mini-editor-preview-modal * {
+  box-sizing: border-box;
+}
+
+/* Ensure modal is completely isolated from parent containers */
+.mini-editor-preview-modal {
+  position: fixed !important;
+  z-index: 9999 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  isolation: isolate;
+  transform: none !important;
+  overflow: visible !important;
+}
+
+/* Prevent any parent overflow from clipping the modal */
+body {
+  overflow: auto !important;
+}
+
+/* Ensure modal content is properly positioned */
+.mini-editor-preview-modal > div {
+  position: relative !important;
+  z-index: 10000 !important;
+  max-height: 90vh !important;
+  max-width: 90vw !important;
+  transform: none !important;
 }
 </style> 
