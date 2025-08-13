@@ -1,7 +1,7 @@
 <template>
   <div class="inline-flex flex-col justify-start items-end w-full">
     <div class="bg-white rounded-xl border border-gray-200 editor-container">
-      <!-- Dynamic Label -->
+          <!-- Dynamic Label -->
       <label
         v-if="label"
         class="border-b border-gray-200 p-2 ps-4 pe-4 mb-2 w-full flex items-center text-start text-[#261E27] text-base font-tajawal font-normal"
@@ -223,6 +223,7 @@ const props = defineProps({
         undo: "تراجع",
         redo: "إعادة",
         clearFormatting: "مسح التنسيق",
+        preview: "معاينة",
       },
       en: {
         switchLanguage: "Switch Language",
@@ -246,6 +247,7 @@ const props = defineProps({
         undo: "Undo",
         redo: "Redo",
         clearFormatting: "Clear Formatting",
+        preview: "Preview",
       },
     }),
   },
@@ -405,7 +407,7 @@ function formatHeading(level) {
   const range = selection.getRangeAt(0);
 
   // Find the block element
-  let node = selection.anchorNode;
+    let node = selection.anchorNode;
   while (node && node !== activeEditor && !(node.nodeType === 1 && /^(P|DIV|H[1-6])$/i.test(node.nodeName))) {
     node = node.parentNode;
   }
@@ -437,9 +439,9 @@ function formatHeading(level) {
     newRange.collapse(false);
     selection.removeAllRanges();
     selection.addRange(newRange);
-    updateValue();
+        updateValue();
     updateActiveFormats();
-    return;
+        return;
   }
 
   // Block found: replace it with a heading

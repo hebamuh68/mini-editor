@@ -232,10 +232,11 @@
       type="button"
       @click="$emit('preview')"
       :class="toolbarBtn()"
-      title="Preview"
+      :title="translations[currentLang].preview || 'Preview'"
       style="background-color: #C6CDFF"
     >
       <Icon name="Preview" class="icon" />
+      <span class="ml-1 text-xs">{{ translations[currentLang].preview || 'Preview' }}</span>
     </button>
 
     <!-- Expand/Fullscreen -->
